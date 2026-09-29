@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumio</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg-deep:#0B0E1A;
+  --bg-panel:#141827;
+  --bg-panel-2:#1B2033;
+  --purple:#7C5CFF;
+  --pink:#FF3E88;
+  --green:#00E28A;
+  --red:#FF4655;
+  --yellow:#FFC93C;
+  --text:#F5F5FA;
+  --muted:#8A8FA3;
+  --radius:18px;
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+
+body{
+  background:
+    radial-gradient(circle at 15% 10%, rgba(124,92,255,0.25), transparent 45%),
+    radial-gradient(circle at 85% 90%, rgba(255,62,136,0.18), transparent 45%),
+    var(--bg-deep);
+  color:var(--text);
+  font-family:'Inter', sans-serif;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+
+.app{
+  width:100%;
+  max-width:720px;
+}
+
+h1,h2,.brand{
+  font-family:'Space Grotesk', sans-serif;
+}
+
+/* ---------- BRAND ---------- */
+.brand-row{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  justify-content:center;
+  margin-bottom:28px;
+}
+.brand{
+  font-size:2rem;
+  font-weight:700;
+  letter-spacing:-0.02em;
+}
+.brand span{ color:var(--pink); }
+.brand-tag{
+  font-size:0.75rem;
+  color:var(--muted);
+  border:1px solid rgba(255,255,255,0.12);
+  padding:3px 9px;
+  border-radius:999px;
+}
+
+/* ---------- CARD ---------- */
+.card{
+  background:linear-gradient(180deg, var(--bg-panel), var(--bg-panel-2));
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:var(--radius);
+  padding:32px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);
+}
+
+/* ---------- SETUP SCREEN ---------- */
+.field{ margin-bottom:20px; }
+label{
+  display:block;
+  font-size:0.8rem;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+input[type=text], select{
+  width:100%;
+  background:rgba(255,255,255,0.04);
+  border:1.5px solid rgba(255,255,255,0.1);
+  color:var(--text);
+  font-family:'Inter', sans-serif;
+  font-size:1rem;
+  padding:14px 16px;
+  border-radius:12px;
+  outline:none;
+  transition:border-color .15s;
+}
+input[type=text]:focus, select:focus{ border-color:var(--purple); }
+.row2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+
+button.primary{
+  width:100%;
+  background:linear-gradient(90deg, var(--purple), var(--pink));
+  color:white;
+  border:none;
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  font-size:1.05rem;
+  padding:16px;
+  border-radius:12px;
+  cursor:pointer;
+  letter-spacing:0.02em;
+  transition:transform .12s, box-shadow .12s;
+  margin-top:6px;
+}
+button.primary:hover:not(:disabled){ transform:translateY(-2px); box-shadow:0 10px 30px rgba(124,92,255,0.4); }
+button.primary:disabled{ opacity:0.5; cursor:not-allowed; }
+
+.error-box{
+  background:rgba(255,70,85,0.1);
+  border:1px solid rgba(255,70,85,0.3);
+  color:#ffb3ba;
+  padding:12px 16px;
+  border-radius:10px;
+  font-size:0.9rem;
+  margin-bottom:16px;
+}
+
+/* ---------- LOADING ---------- */
+.loading{
+  display:flex; flex-direction:column; align-items:center; gap:18px;
+  padding:40px 0;
+}
+.spinner{
+  width:52px; height:52px;
+  border-radius:50%;
+  border:4px solid rgba(255,255,255,0.1);
+  border-top-color:var(--purple);
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+.loading-text{ color:var(--muted); font-size:0.95rem; }
+
+/* ---------- QUIZ SCREEN ---------- */
+.quiz-header{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:18px;
+}
+.q-count{ font-size:0.85rem; color:var(--muted); font-weight:600; }
+.score{
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  color:var(--yellow);
+}
+
+.timer-track{
+  height:8px;
+  background:rgba(255,255,255,0.08);
+  border-radius:999px;
+  overflow:hidden;
+  margin-bottom:26px;
+}
+.timer-fill{
+  height:100%;
+  background:linear-gradient(90deg, var(--green), var(--yellow), var(--red));
+  width:100%;
+  transform-origin:left;
+  transition:transform 0.1s linear;
+}
+
+.question{
+  font-family:'Space Grotesk', sans-serif;
+  font-size:1.4rem;
+  font-weight:700;
+  line-height:1.35;
+  margin-bottom:26px;
+}
+
+.answers{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+@media (max-width:520px){ .answers{ grid-template-columns:1fr; } }
+
+.answer-btn{
+  display:flex; align-items:center; gap:12px;
+  border:none;
+  border-radius:14px;
+  padding:18px 16px;
+  color:white;
+  font-family:'Inter', sans-serif;
+  font-weight:600;
+  font-size:0.98rem;
+  text-align:left;
+  cursor:pointer;
+  transition:transform .1s, filter .1s;
+  position:relative;
+  overflow:hidden;
+}
+.answer-btn:hover:not(:disabled){ transform:translateY(-2px); filter:brightness(1.08); }
+.answer-btn:disabled{ cursor:default; }
+.answer-btn .shape{
+  width:22px; height:22px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.9rem;
+}
+.a0{ background:#E13A5B; }
+.a1{ background:#1E88C7; }
+.a2{ background:#E0A415; }
+.a3{ background:#3AA655; }
+
+.answer-btn.correct{ outline:3px solid var(--green); box-shadow:0 0 0 4px rgba(0,226,138,0.25); }
+.answer-btn.wrong{ outline:3px solid var(--red); box-shadow:0 0 0 4px rgba(255,70,85,0.25); opacity:0.75; }
+.answer-btn.dim{ opacity:0.45; }
+
+.feedback-bar{
+  margin-top:20px;
+  text-align:center;
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  font-size:1.1rem;
+  min-height:1.4em;
+}
+.feedback-bar.correct{ color:var(--green); }
+.feedback-bar.wrong{ color:var(--red); }
+
+button.next{
+  margin-top:16px;
+  width:100%;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.14);
+  color:var(--text);
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  padding:14px;
+  border-radius:12px;
+  cursor:pointer;
+}
+button.next:hover{ background:rgba(255,255,255,0.1); }
+
+/* ---------- RESULTS ---------- */
+.results{ text-align:center; }
+.results-score{
+  font-family:'Space Grotesk', sans-serif;
+  font-size:3.2rem;
+  font-weight:700;
+  background:linear-gradient(90deg, var(--purple), var(--pink));
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  margin:6px 0 4px;
+}
+.results-sub{ color:var(--muted); margin-bottom:24px; }
+.review-list{ text-align:left; margin-bottom:24px; display:flex; flex-direction:column; gap:10px; }
+.review-item{
+  display:flex; gap:10px; align-items:flex-start;
+  background:rgba(255,255,255,0.03);
+  border-radius:10px;
+  padding:12px 14px;
+  font-size:0.88rem;
+}
+.review-item .icon{ flex-shrink:0; }
+.review-item.ok .icon{ color:var(--green); }
+.review-item.bad .icon{ color:var(--red); }
+.review-q{ font-weight:600; margin-bottom:2px; }
+.review-a{ color:var(--muted); }
+
+.btn-row{ display:flex; gap:12px; }
+.btn-row button{ flex:1; }
+button.secondary{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.14);
+  color:var(--text);
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  padding:16px;
+  border-radius:12px;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="brand-row">
+    <div class="brand">Lum<span>io</span></div>
+  </div>
+
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+const state = {
+  screen: 'setup', // setup | loading | quiz | results
+  topic: '',
+  numQuestions: 6,
+  difficulty: 'médio',
+  questions: [],
+  currentIndex: 0,
+  score: 0,
+  answers: [], // { correct: bool, chosenIndex, correctIndex }
+  timerId: null,
+  timeLeft: 20,
+  totalTime: 20,
+  locked: false,
+  error: ''
+};
+
+const TIME_PER_QUESTION = 20;
+const SHAPES = ['▲','◆','●','■'];
+
+function render(){
+  const card = document.getElementById('card');
+  if(state.screen === 'setup') card.innerHTML = renderSetup();
+  else if(state.screen === 'loading') card.innerHTML = renderLoading();
+  else if(state.screen === 'quiz') card.innerHTML = renderQuiz();
+  else if(state.screen === 'results') card.innerHTML = renderResults();
+  attachHandlers();
+}
+
+function renderSetup(){
+  return `
+    ${state.error ? `<div class="error-box">${state.error}</div>` : ''}
+    <div class="field">
+      <label for="topic">Assunto do quiz</label>
+      <input type="text" id="topic" placeholder="Ex: Revolução Pernambucana, League of Legends, Direito Constitucional..." value="${escapeHtml(state.topic)}">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="numQuestions">Número de perguntas</label>
+        <select id="numQuestions">
+          ${[3,4,5,6].map(n => `<option value="${n}" ${n===state.numQuestions?'selected':''}>${n} perguntas</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label for="difficulty">Dificuldade</label>
+        <select id="difficulty">
+          ${['fácil','médio','difícil'].map(d => `<option value="${d}" ${d===state.difficulty?'selected':''}>${d.charAt(0).toUpperCase()+d.slice(1)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <button class="primary" id="generateBtn">Gerar quiz</button>
+  `;
+}
+
+function renderLoading(){
+  return `
+    <div class="loading">
+      <div class="spinner"></div>
+      <div class="loading-text">Gerando perguntas sobre "${escapeHtml(state.topic)}"...</div>
+    </div>
+  `;
+}
+
+function renderQuiz(){
+  const q = state.questions[state.currentIndex];
+  const answered = state.answers[state.currentIndex];
+  return `
+    <div class="quiz-header">
+      <div class="q-count">Pergunta ${state.currentIndex+1} de ${state.questions.length}</div>
+      <div class="score">★ ${state.score}</div>
+    </div>
+    <div class="timer-track"><div class="timer-fill" id="timerFill"></div></div>
+    <div class="question">${escapeHtml(q.question)}</div>
+    <div class="answers">
+      ${q.options.map((opt, i) => {
+        let cls = `answer-btn a${i}`;
+        if(answered){
+          if(i === q.correctIndex) cls += ' correct';
+          else if(i === answered.chosenIndex) cls += ' wrong';
+          else cls += ' dim';
+        }
+        return `<button class="${cls}" data-index="${i}" ${answered?'disabled':''}>
+          <span class="shape">${SHAPES[i]}</span>
+          <span>${escapeHtml(opt)}</span>
+        </button>`;
+      }).join('')}
+    </div>
+    <div class="feedback-bar ${answered ? (answered.correct?'correct':'wrong') : ''}">
+      ${answered ? (answered.correct ? 'Boa! Resposta certa 🎯' : `Não foi dessa vez. Resposta certa: "${escapeHtml(q.options[q.correctIndex])}"`) : ''}
+    </div>
+    ${answered ? `<button class="next" id="nextBtn">${state.currentIndex === state.questions.length-1 ? 'Ver resultado' : 'Próxima pergunta →'}</button>` : ''}
+  `;
+}
+
+function renderResults(){
+  const total = state.questions.length;
+  const pct = Math.round((state.score/total)*100);
+  return `
+    <div class="results">
+      <div class="results-sub">Você acertou</div>
+      <div class="results-score">${state.score}/${total}</div>
+      <div class="results-sub">${pct}% de aproveitamento em "${escapeHtml(state.topic)}"</div>
+    </div>
+    <div class="review-list">
+      ${state.questions.map((q, i) => {
+        const a = state.answers[i];
+        return `<div class="review-item ${a.correct?'ok':'bad'}">
+          <span class="icon">${a.correct?'✓':'✕'}</span>
+          <div>
+            <div class="review-q">${escapeHtml(q.question)}</div>
+            <div class="review-a">Resposta certa: ${escapeHtml(q.options[q.correctIndex])}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="btn-row">
+      <button class="secondary" id="retryBtn">Novo assunto</button>
+      <button class="primary" id="replayBtn">Refazer este quiz</button>
+    </div>
+  `;
+}
+
+function attachHandlers(){
+  if(state.screen === 'setup'){
+    document.getElementById('topic').addEventListener('input', e => state.topic = e.target.value);
+    document.getElementById('numQuestions').addEventListener('change', e => state.numQuestions = parseInt(e.target.value));
+    document.getElementById('difficulty').addEventListener('change', e => state.difficulty = e.target.value);
+    document.getElementById('generateBtn').addEventListener('click', handleGenerate);
+  } else if(state.screen === 'quiz'){
+    document.querySelectorAll('.answer-btn').forEach(btn => {
+      btn.addEventListener('click', () => handleAnswer(parseInt(btn.dataset.index)));
+    });
+    const nextBtn = document.getElementById('nextBtn');
+    if(nextBtn) nextBtn.addEventListener('click', handleNext);
+    if(!state.answers[state.currentIndex]) startTimer();
+  } else if(state.screen === 'results'){
+    document.getElementById('retryBtn').addEventListener('click', resetToSetup);
+    document.getElementById('replayBtn').addEventListener('click', replaySameQuiz);
+  }
+}
+
+async function handleGenerate(){
+  const topic = state.topic.trim();
+  if(!topic){
+    state.error = 'Digite um assunto para gerar o quiz.';
+    render();
+    return;
+  }
+  state.error = '';
+  state.screen = 'loading';
+  render();
+
+  try{
+    const questions = await generateQuestions(topic, state.numQuestions, state.difficulty);
+    state.questions = questions;
+    state.currentIndex = 0;
+    state.score = 0;
+    state.answers = [];
+    state.screen = 'quiz';
+    render();
+  }catch(err){
+    console.error(err);
+    state.error = err.message || 'Não foi possível gerar o quiz agora. Tente novamente ou ajuste o assunto.';
+    state.screen = 'setup';
+    render();
+  }
+}
+
+async function generateQuestions(topic, n, difficulty){
+  const maxAttempts = 3;
+  let lastError = null;
+
+  for(let attempt = 1; attempt <= maxAttempts; attempt++){
+    try{
+      // Chama nossa própria função serverless (api/generate.js), que guarda
+      // a chave da Anthropic no servidor e nunca a expõe no navegador.
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic, n, difficulty })
+      });
+
+      if(response.status === 429){
+        lastError = new Error('RATE_LIMIT');
+        await sleep(1200 * attempt);
+        continue;
+      }
+      if(!response.ok){
+        lastError = new Error('HTTP_' + response.status);
+        await sleep(600 * attempt);
+        continue;
+      }
+
+      const parsed = await response.json();
+      if(!parsed.questions || !Array.isArray(parsed.questions) || parsed.questions.length === 0){
+        lastError = new Error('FORMATO_INESPERADO');
+        continue;
+      }
+      return parsed.questions.map(q => ({
+        question: q.question,
+        options: q.options,
+        correctIndex: q.correctIndex
+      }));
+    }catch(err){
+      lastError = err;
+    }
+  }
+
+  if(lastError && lastError.message === 'RATE_LIMIT'){
+    throw new Error('Muitas requisições em pouco tempo. Espere uns 20-30 segundos e tente de novo.');
+  }
+  throw lastError || new Error('Erro desconhecido');
+}
+
+function sleep(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function startTimer(){
+  clearInterval(state.timerId);
+  state.timeLeft = TIME_PER_QUESTION;
+  state.totalTime = TIME_PER_QUESTION;
+  const fill = document.getElementById('timerFill');
+  if(fill) fill.style.transform = 'scaleX(1)';
+  const start = Date.now();
+  state.timerId = setInterval(() => {
+    const elapsed = (Date.now() - start) / 1000;
+    const remaining = Math.max(0, state.totalTime - elapsed);
+    const ratio = remaining / state.totalTime;
+    const f = document.getElementById('timerFill');
+    if(f) f.style.transform = `scaleX(${ratio})`;
+    if(remaining <= 0){
+      clearInterval(state.timerId);
+      if(!state.answers[state.currentIndex]) handleAnswer(-1);
+    }
+  }, 100);
+}
+
+function handleAnswer(chosenIndex){
+  if(state.answers[state.currentIndex]) return;
+  clearInterval(state.timerId);
+  const q = state.questions[state.currentIndex];
+  const correct = chosenIndex === q.correctIndex;
+  state.answers[state.currentIndex] = { correct, chosenIndex, correctIndex: q.correctIndex };
+  if(correct) state.score++;
+  render();
+}
+
+function handleNext(){
+  if(state.currentIndex < state.questions.length - 1){
+    state.currentIndex++;
+    render();
+  } else {
+    state.screen = 'results';
+    render();
+  }
+}
+
+function resetToSetup(){
+  clearInterval(state.timerId);
+  state.screen = 'setup';
+  state.questions = [];
+  state.answers = [];
+  state.currentIndex = 0;
+  state.score = 0;
+  render();
+}
+
+function replaySameQuiz(){
+  state.currentIndex = 0;
+  state.score = 0;
+  state.answers = [];
+  state.screen = 'quiz';
+  render();
+}
+
+function escapeHtml(str){
+  if(str === undefined || str === null) return '';
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+render();
+</script>
+
+</body>
+</html>
